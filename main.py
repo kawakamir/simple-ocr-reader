@@ -2,13 +2,12 @@ import io
 
 import pyocr
 from PIL import Image
-from pdf2image import convert_from_path
+from pdf2image import convert_from_path, convert_from_bytes
 
 
 def get_file(path: str) -> bin:
     with open(path, "rb") as f:
         file = io.BytesIO(f.read())
-    print(file.getvalue())
     return file
 
 def write_file(path: str, file: str):
@@ -19,7 +18,7 @@ class PreProcessor:
         tools = pyocr.get_available_tools()
         tool = tools[0]
         builder = pyocr.builders.TextBuilder(tesseract_layout=6)
-        lines = tool.image_to_string(Image.open("./samples/test_scan.jpg"), builder=builder)
+        lines = tool.image_to_string(Image.open(get_file("./samples/test_scan.jpg")), builder=builder)
         print(lines)
 
 class OCRTesseract:
@@ -36,7 +35,8 @@ def main():
     PreProcessor().transform()
 
 if __name__ == '__main__':
-    pages = convert_from_path("./samples/2003.00744v1_image_pdf.pdf")
-    for page in pages:
-        page.save("out.jpg", "JPEG")
+    main()
+    # pages = convert_from_bytes(get_file("./samples/2003.00744v1_image_pdf.pdf").getvalue())
+    # for page in pages:
+    #     page.save("out.jpg", "JPEG")
 
