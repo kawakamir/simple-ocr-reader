@@ -1,14 +1,17 @@
 import io
 import os
+from logging import getLogger, DEBUG, Logger, basicConfig, WARNING
 
+import click
 import pyocr
 import typing
 from PIL import Image
-from pdf2image import convert_from_path, convert_from_bytes
+from pdf2image import convert_from_bytes
 
-from exceptions import NotSupportExtension, OutputFileAlreadyExist, InputFileDoesNotExist
 
-SUPPORT_EXTENSION = ["png", "jpg", "jepg", "png"]
+SUPPORT_INPUT_EXTENSION = ["pdf", "jpg", "jepg", "png"]
+SUPPORT_OUTPUT_EXTENSION = ["txt", "text"]
+RGB_BORDER = 120
 
 
 class PDFToJPEG:
@@ -24,13 +27,15 @@ class PDFToJPEG:
 
 class PreProcessor:
 
-    @staticmethod
-    def transform(file: io.BytesIO) -> io.BytesIO:
+    def __init__(self, rgb_border: int) -> None:
+        self.rgb_border = rgb_border
+
+    def transform(self, file: io.BytesIO) -> io.BytesIO:
         img = Image.open(file)
         img = img.convert("RGB")
         size = img.size
         img2 = Image.new("RGB", size)
-        border = 120
+        border = self.rgb_border
         for x in range(size[0]):
             for y in range(size[1]):
                 r, g, b = img.getpixel((x, y))
@@ -76,31 +81,59 @@ def get_file(path: str) -> io.BytesIO:
 
 
 def write_file(str_list: typing.List[str], output_path: str) -> None:
-    with (output_path, "a") as f:
+    with open(output_path, "a") as f:
         f.writelines(str_list)
 
 
-def main(input_path: str, output_path: str) -> None:
+def setup_logger(verbose: bool) -> Logger:
+    if verbose:
+        basicConfig(level=DEBUG)
+    else:
+        basicConfig(level=WARNING)
+    logger = getLogger(__name__)
+    return logger
+
+
+@click.command()
+@click.option("--input", "input_path", type=str, help="path of input file")
+@click.option("--output", "output_path", type=str, help="path of output file")
+@click.option("--verbose", is_flag=True, help="output detailed logs")
+def main(input_path: str, output_path: str, verbose: bool) -> None:
     input_extension = input_path.split(".")[-1]
     output_path_extension = output_path.split(".")[-1]
     if not os.path.exists(input_path):
-        raise InputFileDoesNotExist(f"input: {input_path} does not exit")
-    if input_extension not in SUPPORT_EXTENSION:
-        raise NotSupportExtension(f"input file extension: {input_extension} isn't supported. We support only {SUPPORT_EXTENSION}")
-    if output_path_extension == "txt":
-        raise NotSupportExtension(f"output file extension: {input_extension} isn't supported. This have to be txt")
+        raise click.BadParameter(f"input: {input_path} does not exit")
+    if input_extension not in SUPPORT_INPUT_EXTENSION:
+        raise click.BadParameter(
+            f"input file extension: {input_extension} isn't supported. We support only {SUPPORT_INPUT_EXTENSION}")
+    if output_path_extension not in SUPPORT_OUTPUT_EXTENSION:
+        raise click.BadParameter(f"output file extension: {input_extension} isn't supported. This have to be txt")
     if os.path.exists(output_path):
-        raise OutputFileAlreadyExist(f"output: {output_path} is already exist")
+        raise click.BadParameter(f"output: {output_path} is already exist")
 
-    file = get_file(input_path)
+    logger = setup_logger(verbose)
+    logger.info("start ocr process")
+    input_extension = input_path.split(".")[-1]
 
+    lines = []
+    input_file = get_file(input_path)
+    if input_extension == "pdf":
+        logger.info("start processing pdf to string")
+        for i, file in enumerate(PDFToJPEG().iterate_transform(input_file), 1):
+            lines.extend(ocr_precess(file, PreProcessor(RGB_BORDER), OCRTesseractProcessor(), PostProcessor()))
+            file.close()
+            logger.info(f"finish processing pdf to string, at {i} page")
+    else:
+        logger.info(f"start processing {input_extension} to string")
+        lines.extend(ocr_precess(input_file, PreProcessor(RGB_BORDER), OCRTesseractProcessor(), PostProcessor()))
+        logger.info(f"finish processing {input_extension} to string")
 
-    # get_file("./samples/82251504.png")
-    PreProcessor().transform()
+    logger.info(f"start processing string to text file")
+    write_file(lines, output_path)
+    logger.info(f"start processing string to text file")
+    input_file.close()
+    logger.info(f"finish ocr processing")
 
 
 if __name__ == '__main__':
     main()
-    # pages = convert_from_bytes(get_file("./samples/2003.00744v1_image_pdf.pdf").getvalue())
-    # for page in pages:
-    #     page.save("out.jpg", "JPEG")

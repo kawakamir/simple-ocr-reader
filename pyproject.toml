@@ -8,6 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.8"
 pyocr = "^0.7.2"
 pdf2image = "^1.14.0"
+click = "^7.1.2"
 
 [tool.poetry.dev-dependencies]
 yapf = "^0.30.0"
