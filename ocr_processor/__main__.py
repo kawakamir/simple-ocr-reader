@@ -14,15 +14,6 @@ SUPPORT_OUTPUT_EXTENSIONS = ["txt", "text"]
 RGB_BORDER = 120
 
 
-class PDFToJPEG:
-
-    @staticmethod
-    def iterate_transform(file: io.BytesIO) -> typing.Iterator[io.BytesIO]:
-        pages = convert_from_bytes(file.getvalue())
-        for page in pages:
-            new_file = io.BytesIO()
-            page.save(new_file, "JPEG")
-            yield new_file
 
 
 def setup_logger(verbose: bool) -> Logger:
