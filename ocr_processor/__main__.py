@@ -1,19 +1,16 @@
-import io
 import os
 import typing
 from logging import DEBUG, WARNING, Logger, basicConfig, getLogger
 
 import click
-from pdf2image import convert_from_bytes
 
 from file_operators import get_file, write_file
-from processors import (PostProcessor, PreProcessor, OCRTesseractProcessor, ocr_precess)
+from processors import (PostProcessor, PreProcessor, OCRTesseractProcessor, ocr_precess, PDFToJPEG)
+from validations import validation_input_path, validation_output_path
 
 SUPPORT_INPUT_EXTENSIONS = ["pdf", "jpg", "jepg", "png"]
 SUPPORT_OUTPUT_EXTENSIONS = ["txt", "text"]
 RGB_BORDER = 120
-
-
 
 
 def setup_logger(verbose: bool) -> Logger:
@@ -24,23 +21,10 @@ def setup_logger(verbose: bool) -> Logger:
     logger = getLogger(__name__)
     return logger
 
-def validation_input_path(input_path: str, input_extension, support_input_extensions: typing.List[str]) -> None:
-    if not os.path.exists(input_path):
-        raise click.BadParameter(f"input: {input_path} does not exit")
-    if input_extension not in support_input_extensions:
-        raise click.BadParameter(
-            f"input file extension: {input_extension} isn't supported. We support only {support_input_extensions}")
-
-def validation_output_path(output_path: str, output_extension: str, support_output_extensions: typing.List[str]) -> None:
-    if output_extension not in support_output_extensions:
-        raise click.BadParameter(f"output file extension: {output_extension} isn't supported. This have to be txt")
-    if os.path.exists(output_path):
-        raise click.BadParameter(f"output: {output_path} is already exist")
-
 
 @click.command()
-@click.option("--input", "input_path", type=str, help="path of input file")
-@click.option("--output", "output_path", type=str, help="path of output file")
+@click.option("--input", "input_path", type=str, help="path of input file", required=True)
+@click.option("--output", "output_path", type=str, help="path of output file", required=True)
 @click.option("--verbose", is_flag=True, help="output detailed logs")
 def main(input_path: str, output_path: str, verbose: bool) -> None:
     logger = setup_logger(verbose)
