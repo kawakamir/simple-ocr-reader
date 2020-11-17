@@ -1,7 +1,7 @@
 import pytest
 from click import BadParameter
 
-from ocr_processor.validations import validation_input_path, validation_output_path
+from validations import validation_input_path, validation_output_path
 
 
 @pytest.mark.parametrize(

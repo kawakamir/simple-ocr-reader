@@ -2,8 +2,8 @@ import io
 
 import pytest
 
-from ocr_processor.file_operators import get_file
-from ocr_processor.processors import PreProcessor, OCRTesseractProcessor, PostProcessor, PDFToJPEG
+from file_operators import get_file
+from processors import PreProcessor, OCRTesseractProcessor, PostProcessor, PDFToJPEG
 
 
 def test_pdf_to_jpeg():
@@ -28,6 +28,9 @@ def test_ocr_tesseract_processor():
 
 
 def test_post_processor():
-    text = "asb√sss"
-    new_text = PostProcessor().transform(text)
-    assert new_text == "asbsss"
+    text1 = "asb√sss"
+    text2 = "asb-sss"
+    new_text1 = PostProcessor().transform(text1)
+    new_text2 = PostProcessor().transform(text2)
+    assert new_text1 == "asbsss"
+    assert new_text2 == "asb-sss"

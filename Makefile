@@ -1,5 +1,6 @@
 SETUP_CONFIG:=SETUP.CFG
 TARGET_DIR:=ocr_processor
+TESTS_DIR:=tests
 
 .PHONY: setup
 setup:
@@ -15,3 +16,7 @@ yapf: setup
 
 .PHONY: format
 format: isort yapf
+
+.PHONY: pytest
+pytest: setup
+	PYTHONPATH=$(TARGET_DIR) poetry run pytest $(TESTS_DIR)
