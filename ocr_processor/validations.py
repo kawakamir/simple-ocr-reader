@@ -1,7 +1,7 @@
 import os
+import typing
 
 import click
-import typing
 
 
 def validation_input_path(input_path: str, support_input_extensions: typing.List[str]) -> None:

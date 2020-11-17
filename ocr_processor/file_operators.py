@@ -1,6 +1,7 @@
 import io
 import typing
 
+
 def get_file(path: str) -> io.BytesIO:
     with open(path, "rb") as f:
         file = io.BytesIO(f.read())

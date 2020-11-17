@@ -3,9 +3,14 @@ import typing
 from logging import DEBUG, WARNING, Logger, basicConfig, getLogger
 
 import click
-
 from file_operators import get_file, write_file
-from processors import (PostProcessor, PreProcessor, OCRTesseractProcessor, ocr_precess, PDFToJPEG)
+from processors import (
+    OCRTesseractProcessor,
+    PDFToJPEG,
+    PostProcessor,
+    PreProcessor,
+    ocr_precess,
+)
 from validations import validation_input_path, validation_output_path
 
 SUPPORT_INPUT_EXTENSIONS = ["pdf", "jpg", "jepg", "png"]

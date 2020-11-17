@@ -1,10 +1,10 @@
 import io
 import re
+import typing
 
 import pyocr
-import typing
-from PIL import Image
 from pdf2image import convert_from_bytes
+from PIL import Image
 
 
 class PDFToJPEG:
