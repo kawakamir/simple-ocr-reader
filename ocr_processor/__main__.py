@@ -1,5 +1,3 @@
-import os
-import typing
 from logging import DEBUG, WARNING, Logger, basicConfig, getLogger
 
 import click
