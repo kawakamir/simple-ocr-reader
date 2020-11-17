@@ -34,9 +34,8 @@ def main(input_path: str, output_path: str, verbose: bool) -> None:
     logger.info("start ocr process")
 
     input_extension = input_path.split(".")[-1]
-    output_extension = output_path.split(".")[-1]
-    validation_input_path(input_path, input_extension, SUPPORT_INPUT_EXTENSIONS)
-    validation_output_path(output_path, output_extension, SUPPORT_OUTPUT_EXTENSIONS)
+    validation_input_path(input_path, SUPPORT_INPUT_EXTENSIONS)
+    validation_output_path(output_path,  SUPPORT_OUTPUT_EXTENSIONS)
 
     lines = []
     input_file = get_file(input_path)
