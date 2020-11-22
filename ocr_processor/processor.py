@@ -19,7 +19,7 @@ class PreProcessor:
     def __init__(self, rgb_border: int) -> None:
         self.rgb_border = rgb_border
 
-    def transform(self, file: io.BytesIO) -> io.BytesIO:
+    def run(self, file: io.BytesIO) -> io.BytesIO:
         img = Image.open(file)
         img = img.convert("RGB")
         size = img.size
@@ -39,7 +39,7 @@ class PreProcessor:
 class OCRTesseractProcessor:
 
     @staticmethod
-    def transform(file: io.BytesIO) -> str:
+    def run(file: io.BytesIO) -> str:
         tools = pyocr.get_available_tools()
         tool = tools[0]
         builder = pyocr.builders.TextBuilder(tesseract_layout=6)
@@ -50,7 +50,7 @@ class OCRTesseractProcessor:
 class PostProcessor:
 
     @classmethod
-    def transform(cls, text: str) -> str:
+    def run(cls, text: str) -> str:
         m = re.findall("[a-zA-Z_0-9\-\]\[{}():~,/; \n\.]", text)
         new_text = ""
         if m:
@@ -60,10 +60,10 @@ class PostProcessor:
 
 def ocr_precess(file: io.BytesIO, pre_processor: PreProcessor, oct_tesseract_processor: OCRTesseractProcessor,
                 post_processor: PostProcessor) -> str:
-    fixed_file = pre_processor.transform(file)
-    text = oct_tesseract_processor.transform(fixed_file)
+    fixed_file = pre_processor.run(file)
+    text = oct_tesseract_processor.run(fixed_file)
     fixed_file.close()
-    fixed_text = post_processor.transform(text)
+    fixed_text = post_processor.run(text)
     return fixed_text
 
 
